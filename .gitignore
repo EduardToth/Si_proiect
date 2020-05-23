@@ -1,0 +1,4 @@
+.DS_Store
+.idea
+/mobile_app/*
+!/mobile_app/lib/
