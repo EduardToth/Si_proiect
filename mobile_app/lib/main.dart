@@ -4,13 +4,10 @@ import 'Room.dart';
 
 const Color MainThemeColor = Colors.blue;
 
-const Color ColorIsOnAuto = Colors.white;
-const Color ColorNotIsOnAuto = Colors.orange;
-
 void main() {
   List<Room> rooms = new List<Room>();
   rooms.add(new Room(0, "Living Room", 10000, false));
-  rooms.add(new Room(1, "Bed Room", 28, true));
+  rooms.add(new Room(1, "Bed Room", 20, true));
 
   runApp(MyApp(rooms));
 }

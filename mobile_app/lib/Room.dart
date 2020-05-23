@@ -10,13 +10,12 @@ class Room{
   static const int minDesiredTemperature = 15;
   static const int maxDesiredTemperature = 35;
 
-  bool isOnAuto = false;
-  bool isOn = false;
+  bool remote = false;
 
-  Room(int id, String roomName, int desiredTemperature, bool isOnAuto){
+  Room(int id, String roomName, int desiredTemperature, bool remote){
     this.id = id;
     this.roomName = roomName;
-    this.isOnAuto = isOnAuto;
+    this.remote = remote;
 
     if(desiredTemperature < minDesiredTemperature){
       this.desiredTemperature = minDesiredTemperature;
