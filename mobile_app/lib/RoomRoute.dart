@@ -58,7 +58,11 @@ class _RoomRouteState extends State<RoomRoute>{
             print("Room Page. Not reading anything");
           }
 
-          BluetoothFunctionality_SingleDevice.sendMessageViaBluetooth(String.fromCharCode(room.desiredTemperature));
+          int temp = room.desiredTemperature;
+          if(room.remote){
+            temp += 64;
+          }
+          BluetoothFunctionality_SingleDevice.sendMessageViaBluetooth(String.fromCharCode(temp));
         });
       }
       catch(Exception){
@@ -95,24 +99,14 @@ class _RoomRouteState extends State<RoomRoute>{
       children: <Widget>[
         SwitchListTile(
           title: Text(
-            "Automatic mode",
+            "Remote control",
             style: TextStyle(fontSize: fontSize),
           ),
-          value: room.isOnAuto,
+          value: room.remote,
           onChanged: (bool b) {
             _toggleAuto();
           },
         ),
-        SwitchListTile(
-          title: Text(
-            "Heater",
-            style: TextStyle(fontSize: fontSize),
-          ),
-          value: room.isOn,
-          onChanged: (bool b) {
-            _toggleOnOff();
-          },
-        )
       ],
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
     );
@@ -155,8 +149,8 @@ class _RoomRouteState extends State<RoomRoute>{
 
               room.desiredTemperature = value.toInt();
             },
-            activeColor: room.isOnAuto ? _colorSliderActiveColorAuto : _colorSliderActiveColorNotAuto,
-            inactiveColor: room.isOnAuto ? _colorSliderInactiveColorAuto : _colorSliderInactiveColorNotAuto,
+            activeColor: room.remote ? _colorSliderActiveColorAuto : _colorSliderActiveColorNotAuto,
+            inactiveColor: room.remote ? _colorSliderInactiveColorAuto : _colorSliderInactiveColorNotAuto,
           ),
           data: SliderThemeData(
             showValueIndicator: ShowValueIndicator.always
@@ -168,18 +162,11 @@ class _RoomRouteState extends State<RoomRoute>{
 
   void _toggleAuto(){
     setState(() {
-      _setIsOnAuto(!room.isOnAuto);
+      _setIsOnAuto(!room.remote);
     });
   }
 
-  void _toggleOnOff(){
-    setState(() {
-      room.isOn = !room.isOn;
-      _setIsOnAuto(false);
-    });
-  }
-
-  void _setIsOnAuto(bool isOnAuto){
-    room.isOnAuto = isOnAuto;
+  void _setIsOnAuto(bool remote){
+    room.remote = remote;
   }
 }

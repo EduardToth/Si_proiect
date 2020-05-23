@@ -56,8 +56,8 @@ class _HomeRouteState extends State<HomeRoute>{
   Future func() async{
     await BluetoothFunctionality_SingleDevice.mapRoomsWithBluetoothDevices(rooms);
 
-    funcMic(0);
-    funcMic(1);
+    await funcMic(0);
+    await funcMic(1);
   }
 
   Future funcMic(int index) async{
@@ -65,9 +65,24 @@ class _HomeRouteState extends State<HomeRoute>{
 
     print("starting sending");
 
+    Uint8List msg;
+    try {
+      msg = BluetoothFunctionality_SingleDevice.readMessageFromBluetooth();
+    }
+    catch(e){
+      print(e);
+    }
+    print("read now " + msg.toString());
+
     print("matched; sending room name");
     await BluetoothFunctionality_SingleDevice.sendMessageViaBluetooth(rooms.elementAt(index).roomName + "\n");
-    
+
+    int temp = rooms.elementAt(index).desiredTemperature;
+    if(rooms.elementAt(index).remote){
+      temp += 64;
+    }
+    BluetoothFunctionality_SingleDevice.sendMessageViaBluetooth(String.fromCharCode(temp));
+
     await BluetoothFunctionality_SingleDevice.disconnect();
     print("got disconnected");
   }
@@ -132,25 +147,12 @@ class _HomeRouteState extends State<HomeRoute>{
                 room.roomName,
                 style: TextStyle(fontSize: fontSize),
               ),
-              Row(
-                children: <Widget>[
-                  Text(
-                    room.currentTemperature.toString(),
-                    style: TextStyle(fontSize: fontSize, color: Colors.black),
-                  ),
-                  Text(
-                    " / " + room.desiredTemperature.toString() + " ℃",
-                    style: TextStyle(fontSize: fontSize, color: Colors.grey),
-                  )
-                ],
-              )
             ],
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
           ),
           padding: EdgeInsets.all(20),
           decoration: BoxDecoration(
             border: Border(bottom: BorderSide(color: Colors.grey, width: 1)),
-            color: room.isOnAuto ? ColorIsOnAuto : ColorNotIsOnAuto
           ),
         ),
       onTap: () { pushSecondPage(room); },
