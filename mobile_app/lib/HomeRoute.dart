@@ -20,26 +20,6 @@ class HomeRoute extends StatefulWidget{
     state = _HomeRouteState(rooms);
     return state;
   }
-
-  /// push secondPage
-  static void pushSecondPage(){
-    //_HomeRouteState.pushSecondPage();
-  }
-
-
-  // get bluetooth device name
-  static String getBluetoothDeviceName(){
-    //return _HomeRouteState.getBluetoothDeviceName();
-  }
-
-  static bool getAutomatic(){
-    //return _HomeRouteState.automatic;
-  }
-
-  static void automaticPress(){
-    //_HomeRouteState._automaticPress();
-  }
-
 }
 
 class _HomeRouteState extends State<HomeRoute>{
@@ -62,9 +42,6 @@ class _HomeRouteState extends State<HomeRoute>{
 
   Future funcMic(int index) async{
     await BluetoothFunctionality_SingleDevice.connect(rooms.elementAt(index).bluetoothDevice);
-
-    print("starting sending");
-
     Uint8List msg;
     try {
       msg = BluetoothFunctionality_SingleDevice.readMessageFromBluetooth();
@@ -72,9 +49,6 @@ class _HomeRouteState extends State<HomeRoute>{
     catch(e){
       print(e);
     }
-    print("read now " + msg.toString());
-
-    print("matched; sending room name");
     await BluetoothFunctionality_SingleDevice.sendMessageViaBluetooth(rooms.elementAt(index).roomName + "\n");
 
     int temp = rooms.elementAt(index).desiredTemperature;
@@ -82,15 +56,13 @@ class _HomeRouteState extends State<HomeRoute>{
       temp += 64;
     }
     BluetoothFunctionality_SingleDevice.sendMessageViaBluetooth(String.fromCharCode(temp));
-
-    await BluetoothFunctionality_SingleDevice.disconnect();
-    print("got disconnected");
   }
 
   /// build function
   Widget build(BuildContext context){
     _context = context;
 
+    // reads message from bluetooth every second
     new Timer(const Duration(seconds:1), (){
       try {
         setState(() {
@@ -101,20 +73,14 @@ class _HomeRouteState extends State<HomeRoute>{
           catch(e){
             print(e);
           }
-
-          if(msg != null) {
-            //print("Main Page is reading: " + msg.toString());
-          }
-          else{
-            //print("Not reading anything");
-          }
         });
       }
       catch(Exception){
-        print("exited main");
+
       }
     });
 
+    // the  actual interface is built here
     return Scaffold(
       appBar: AppBar(
         title: Text("My Home"),
@@ -126,6 +92,7 @@ class _HomeRouteState extends State<HomeRoute>{
   }
 
   Widget _roomListViewBuilder(List<Room> rooms){
+    // add a clickable list element for every room available
     Widget retValue = ListView(
       children: <Widget>[
         _roomBuider(rooms.elementAt(0)),
@@ -140,6 +107,7 @@ class _HomeRouteState extends State<HomeRoute>{
     double fontSize = 15;
 
     return GestureDetector(
+      // actual list element look and functionality
         child: Container(
           child: Row(
             children: <Widget>[
@@ -159,95 +127,15 @@ class _HomeRouteState extends State<HomeRoute>{
     );
   }
 
-/*
-  /// send message
-  static void _sendMessage(){
-    var aux;
-
-    // automatic
-    if(automatic){
-      aux = _messageToSend.automatic;
-    }
-
-    else{
-
-      // up
-      if(_up){
-        if(_left){
-          aux = _messageToSend.up_left;
-        }else if(_right){
-          aux = _messageToSend.up_right;
-        }else{
-          aux = _messageToSend.up;
-        }
-      }
-
-      // down
-      else if(_down){
-        if(_left){
-          aux = _messageToSend.down_left;
-        }else if(_right){
-          aux = _messageToSend.down_right;
-        }else{
-          aux = _messageToSend.down;
-        }
-      }
-
-      // just left or right
-      else if(_left){
-        aux = _messageToSend.left;
-      }else if(_right){
-        aux = _messageToSend.right;
-      }
-
-      // stop
-      else{
-        aux = _messageToSend.stop;
-      }
-
-    }
-
-    _bluetoothDevice.sendMessageViaBluetooth(aux.index.toString());
-    print("printed: " + aux.toString() + " - " + aux.index.toString());
-  }
-
-*/
   /// push secondPage
+  /// which opens the individual room view
   void pushSecondPage(Room room) async{
     RoomRoute currentRoom = RoomRoute(room);
-    //_bluetooth.roomRouteLink = currentRoom;
-
     await Navigator.push(
       _context,
       MaterialPageRoute(builder: (context) => currentRoom),
     );
 
-    //_bluetooth.roomRouteLink = null;
     setState(() {});
-
-    /*Navigator.push(context, new MaterialPageRoute<String>(
-        builder: (BuildContext context) {
-          return new Center(
-            child: new GestureDetector(
-                child: new Text('OK'),
-                onTap: () { Navigator.pop(context, "Audio1"); }
-            ),
-          );
-        },
-    )
-    );*/
-
-    /*Scaffold.of(context).showSnackBar(
-      SnackBar(
-        content: Text(room.desiredTemperature.toString()),
-      )
-    );*/
   }
-
-/*
-  // get bluetooth device name
-  static String getBluetoothDeviceName(){
-    return _bluetoothDevice.getBluetoothDeviceName();
-  }
-*/
 }
