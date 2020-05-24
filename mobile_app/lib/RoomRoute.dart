@@ -35,15 +35,18 @@ class _RoomRouteState extends State<RoomRoute>{
   }
 
   Future func() async{
+    // when opening the individual room's view it first connects to the room's bluetooth device
     await BluetoothFunctionality_SingleDevice.connect(room.bluetoothDevice);
   }
 
   Widget build(BuildContext context){
+    // every second it reads the current room temperature from bluetooth and sends the desired temperature back
     new Timer(const Duration(seconds:1), (){
       try {
         setState(() {
           Uint8List msg;
           try {
+            // read the current room temperatre
             msg = BluetoothFunctionality_SingleDevice.readMessageFromBluetooth();
           }
           catch(e){
@@ -51,31 +54,37 @@ class _RoomRouteState extends State<RoomRoute>{
           }
 
           if(msg != null) {
-            print("Room Page is reading: " + msg.toString());
             room.currentTemperature = msg.first;
           }
           else{
-            print("Room Page. Not reading anything");
+
           }
 
+          // the format of the sent byte is:
+          // 6 LSB are the actual desired temperature
+          // byte 7 is a toggle between the mobile app and the on board potentiometer
           int temp = room.desiredTemperature;
           if(room.remote){
             temp += 64;
           }
+          // send the desired temperature
           BluetoothFunctionality_SingleDevice.sendMessageViaBluetooth(String.fromCharCode(temp));
         });
       }
       catch(Exception){
+        // when exiting the individual room's view in the GUI
+        // the timer automatically raises an exception
+        // and that is how we know when to disconnect from bluetooth
         BluetoothFunctionality_SingleDevice.disconnect();
       }
 
 
     });
 
+    // the actual GUI builder is here
     return Scaffold(
       appBar: AppBar(
         title: Text(room.roomName),
-        //backgroundColor: room.IsOnAuto ? ColorIsOnAuto : ColorNotIsOnAuto
       ),
       body: Container(
         child: Column(
@@ -93,6 +102,8 @@ class _RoomRouteState extends State<RoomRoute>{
   }
 
   Widget _buildButtons(){
+    // toggle between the mobile app and the on board potentiometer
+    // found on the top of the GUI
     double fontSize = 15;
 
     return Column(
@@ -113,6 +124,8 @@ class _RoomRouteState extends State<RoomRoute>{
   }
 
   Widget _buildTemperatureDisplay(){
+    // display of the current room temperature
+    // found in the middle of the GUI
     return Column(
       children: <Widget>[
         Text(
@@ -129,6 +142,8 @@ class _RoomRouteState extends State<RoomRoute>{
   }
 
   Widget _buildDesiredTemperatureSelector(){
+    // slider used for setting the desired room temperature
+    // found on the bottom of the GUI
     return Column(
       children: <Widget>[
         Text(
